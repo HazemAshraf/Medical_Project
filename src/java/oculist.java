@@ -325,12 +325,13 @@ public class oculist extends HttpServlet {
             String transID = "";
 
             Connection Con = null;
-            Statement stmt = null, stmt1 = null;
+            Statement stmt = null, stmt1 = null , stmt2 = null;
 
             getcon c = new getcon();
             Con = c.myconnection();
             stmt = Con.createStatement();
             stmt1 = Con.createStatement();
+			stmt2 = Con.createStatement();
             String sql = "";
 
             sql = "select requestID,MedicalCheckupID,request_date,nationality,national_id,PassportNo,eyes_inspection_result,internal_inspection_result,blood_group,hasPhoto from mi.clients_data where requestID = '" + requestID_UI + "'";
@@ -478,7 +479,17 @@ public class oculist extends HttpServlet {
 
                     stmt5 = Con.createStatement();
                     int updated = stmt5.executeUpdate("insert into mi.log_success_request (request,requestID) values ('" + jsonRequest + "' , '" + requestID + "')");
-                    stmt5.close();
+                              // log this transaction 
+            // get logged username
+            String name = request.getSession().getAttribute("NAME").toString();
+            // get logged trafic_unit
+            String TU = request.getSession().getAttribute("TRAFFIC_UNIT").toString();
+            // update log table 
+            sql = "insert into mi.oculist_log(username,traffic_unit,requestID) values('"+name+"','"+TU+"','"+requestID+"');";
+            int inserted = stmt2.executeUpdate(sql);
+            stmt2.close();
+            ///////////////////////////////////////////////////////////
+					stmt5.close();
                     stmt.close();
                     Con.close();
                     int res = sendPOST("http://" + IP + "/" + API_CTX + "/API/MedicalCheckup/NotifyResults", json, requestID);
@@ -532,7 +543,17 @@ public class oculist extends HttpServlet {
             } else {
                 if (internInspRes.isEmpty()) {
                     stmt.executeUpdate("update `clients_data` set `medical_conditions` = '" + medical_conditions_str + "' , `eyes_inspection_result` = '" + result + "' , `inspection_status` = 'W' , `eyes_exam_date` = '" + eye_request_date + "' , `right_eye_degree` = '" + Reye + "' , `left_eye_degree` = '" + Leye + "' where `requestID` ='" + requestID + "'");
-                } else {
+					          // log this transaction 
+            // get logged username
+            String name = request.getSession().getAttribute("NAME").toString();
+            // get logged trafic_unit
+            String TU = request.getSession().getAttribute("TRAFFIC_UNIT").toString();
+            // update log table 
+            sql = "insert into mi.oculist_log(username,traffic_unit,requestID) values('"+name+"','"+TU+"','"+requestID+"');";
+            int inserted = stmt2.executeUpdate(sql);
+            stmt2.close();
+            ///////////////////////////////////////////////////////////
+			  } else {
                     if ((internInspRes.equals("acc") && result.equals("acc")) || (internInspRes.equals("sacc") && result.equals("acc")) || (internInspRes.equals("acc") && result.equals("sacc")) || (internInspRes.equals("sacc") && result.equals("sacc"))) {
                         stmt.executeUpdate("update `clients_data` set `medical_conditions` = '" + medical_conditions_str + "' , `eyes_inspection_result` = '" + result + "' , `inspection_status` = 'C' , `eyes_exam_date` = '" + eye_request_date + "' , `right_eye_degree` = '" + Reye + "' , `left_eye_degree` = '" + Leye + "' where `requestID` ='" + requestID + "'");
                         sql = "select photo from mi.clients_photos where requestID = '" + requestID_UI + "'";
@@ -570,7 +591,17 @@ public class oculist extends HttpServlet {
 
                         stmt5 = Con.createStatement();
                         int updated = stmt5.executeUpdate("insert into mi.log_success_request (request,requestID) values ('" + jsonRequest + "' , '" + requestID + "')");
-                        stmt5.close();
+                                  // log this transaction 
+            // get logged username
+            String name = request.getSession().getAttribute("NAME").toString();
+            // get logged trafic_unit
+            String TU = request.getSession().getAttribute("TRAFFIC_UNIT").toString();
+            // update log table 
+            sql = "insert into mi.oculist_log(username,traffic_unit,requestID) values('"+name+"','"+TU+"','"+requestID+"');";
+            int inserted = stmt2.executeUpdate(sql);
+            stmt2.close();
+            ///////////////////////////////////////////////////////////
+						stmt5.close();
                         stmt.close();
                         Con.close();
                         int res = sendPOST("http://" + IP + "/" + API_CTX + "/API/MedicalCheckup/NotifyResults", json, requestID);

@@ -352,6 +352,7 @@ public class internist extends HttpServlet {
 
             stmt = Con.createStatement();
             stmt1 = Con.createStatement();
+			stmt2 = Con.createStatement();
             // System.err.println(transID);
             String sql = "";
             //  System.out.println("Composite key is = > " + theCountry + passNo);
@@ -508,7 +509,17 @@ public class internist extends HttpServlet {
 
                     stmt5 = Con.createStatement();
                     int updated = stmt5.executeUpdate("insert into mi.log_success_request (request,requestID) values ('" + jsonRequest + "' , '" + requestID + "')");
-                    stmt5.close();
+                              // log this transaction 
+                    // get logged username
+                    String name = request.getSession().getAttribute("NAME").toString();
+                    // get logged trafic_unit
+                    String TU = request.getSession().getAttribute("TRAFFIC_UNIT").toString();
+                    // update log table 
+                    sql = "insert into mi.internist_log(username,traffic_unit,requestID) values('" + name + "','" + TU + "','" + requestID + "');";
+                    int inserted = stmt2.executeUpdate(sql);
+                    stmt2.close();
+                    ///////////////////////////////////////////////////////////
+					stmt5.close();
                     stmt.close();
                     Con.close();
                     int res = sendPOST("http://" + IP + "/" + API_CTX + "/API/MedicalCheckup/NotifyResults", json, requestID);
@@ -564,7 +575,17 @@ public class internist extends HttpServlet {
             } else {
                 if (eyeInspRes.isEmpty()) {
                     stmt.executeUpdate("update `clients_data` set `medical_conditions` = '" + medical_conditions_str + "' , `blood_group` = '" + blood_group + "' , `internal_inspection_result` = '" + result + "' , `inspection_status` = 'W' , `internal_inspection_date` = '" + internal_request_date + "' where `requestID` ='" + requestID + "'");
-                } else {
+					          // log this transaction 
+                    // get logged username
+                    String name = request.getSession().getAttribute("NAME").toString();
+                    // get logged trafic_unit
+                    String TU = request.getSession().getAttribute("TRAFFIC_UNIT").toString();
+                    // update log table 
+                    sql = "insert into mi.internist_log(username,traffic_unit,requestID) values('" + name + "','" + TU + "','" + requestID + "');";
+                    int inserted = stmt2.executeUpdate(sql);
+                    stmt2.close();
+                    ///////////////////////////////////////////////////////////
+			  } else {
                     if ((eyeInspRes.equals("acc") && result.equals("acc")) || (eyeInspRes.equals("sacc") && result.equals("acc")) || ((eyeInspRes.equals("acc") && result.equals("sacc"))) || ((eyeInspRes.equals("sacc") && result.equals("sacc")))) {
                         stmt.executeUpdate("update `clients_data` set `medical_conditions` = '" + medical_conditions_str + "' , `blood_group` = '" + blood_group + "' , `internal_inspection_result` = '" + result + "' , `inspection_status` = 'C' , `internal_inspection_date` = '" + internal_request_date + "' where `requestID` ='" + requestID + "'");
                         //
@@ -601,7 +622,17 @@ public class internist extends HttpServlet {
 
                         stmt6 = Con.createStatement();
                         int updated = stmt6.executeUpdate("insert into mi.log_success_request (request,requestID) values ('" + jsonRequest + "' , '" + requestID + "')");
-                        stmt6.close();
+                                  // log this transaction 
+                    // get logged username
+                    String name = request.getSession().getAttribute("NAME").toString();
+                    // get logged trafic_unit
+                    String TU = request.getSession().getAttribute("TRAFFIC_UNIT").toString();
+                    // update log table 
+                    sql = "insert into mi.internist_log(username,traffic_unit,requestID) values('" + name + "','" + TU + "','" + requestID + "');";
+                    int inserted = stmt2.executeUpdate(sql);
+                    stmt2.close();
+                    ///////////////////////////////////////////////////////////
+						stmt6.close();
                         stmt.close();
                         Con.close();
 
