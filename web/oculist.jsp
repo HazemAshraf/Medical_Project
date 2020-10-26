@@ -6,7 +6,7 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <html>
     <head>
-       
+
         <meta http-equiv="Content-type" content="text/html;charset=UTF-8"/>
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
@@ -29,7 +29,11 @@
 
     </head>
     <body>
-       
+        <%
+                                            Connection Con = null;
+                                            getcon c = new getcon();
+                                            Con = c.myconnection();
+        %>
         <input type="hidden" id="traffic_unit_code" value="<%= request.getSession().getAttribute("TRAFFIC_UNIT_CODE").toString()%>" />
         <div class="site-wrap">
 
@@ -113,8 +117,8 @@
                             <div class="col-md-8 text-center">
                                 <h1>برجاء اختيار هوية المواطن</h1>
                                 <br>
-<!--                                <button type="button" style="font-size: 15px;color: white;height: 80px ; width: 150px;background-color: #ff5c33;border-radius: 1px" class="btn btn-md ">مصــري</button>
-                                <button type="button" style="font-size: 15px;color: white;height: 80px ; width: 150px;background-color: #ff5c33;border-radius: 1px" class="btn btn-md">أجنبــي</button>-->
+                                <!--                                <button type="button" style="font-size: 15px;color: white;height: 80px ; width: 150px;background-color: #ff5c33;border-radius: 1px" class="btn btn-md ">مصــري</button>
+                                                                <button type="button" style="font-size: 15px;color: white;height: 80px ; width: 150px;background-color: #ff5c33;border-radius: 1px" class="btn btn-md">أجنبــي</button>-->
                                 <div><a style="border-radius: 4px;height: 80px ; width: 150px;font-size: 15px;color: white" onclick="showFor()" class="btn btn-primary btn-md">أجنبي</a>    <a style="border-radius: 4px;height: 80px ; width: 150px;font-size: 15px;color: white" onclick="showEgy()" class="btn btn-primary btn-md">مصري</a></div>
                             </div>
                         </div>
@@ -152,22 +156,22 @@
                                     <input onblur="getName()" name="transID" type="text" id="nid" class="form-control" required="يرجاء ملئ هذا الحقل">
                                 </div>
                             </div>
-                            
-                            
-              <div style="display: block" id="requestIDsDiv" class="row form-group">
+
+
+                            <div style="display: block" id="requestIDsDiv" class="row form-group">
 
                                 <div class="col-md-12">
                                     <label class="text-black" for="subject">رقم المعاملة</label> 
                                     <select id="requestIDsID"  class="form-control mdb-select colorful-select dropdown-primary"   name="requestIDs"   required="يرجاء ملئ هذا الحقل">
-<!--                                        <option disabled selected value>الحالة الطبية</option>-->
-                   
+                                        <!--                                        <option disabled selected value>الحالة الطبية</option>-->
+
 
                                     </select>
 
                                 </div>
                             </div>
-                            
-                            
+
+
                             <div class="row form-group">
 
                                 <div class="col-md-12">
@@ -207,17 +211,14 @@
                                     <select id="medCondID"  class="form-control mdb-select colorful-select dropdown-primary"   name="medical_conditions"   required="يرجاء ملئ هذا الحقل" multiple>
                                         <option disabled selected value>الحالة الطبية</option>
                                         <%
-                                            Connection Con = null;
+                                            
                                             Statement stmt = null;
-
-                                            getcon c = new getcon();
-                                            Con = c.myconnection();
                                             stmt = Con.createStatement();
                                             ResultSet rs = stmt.executeQuery("select * from mi.medicalconditions");
                                             while (rs.next()) {
                                         %><option value="<%= rs.getString("lookUp_ID")%>"><%= rs.getString("description")%></option><%
                                             }
-stmt.close();
+                                            stmt.close();
                                         %>
 
                                     </select>
@@ -235,12 +236,12 @@ stmt.close();
                                 </div>
                             </div>
 
-                      
-                               
-                                        <center>
-                                            <input style="text-align: center;border-radius: 4px;font-size: 14px" type="submit" value="تسجيل نتيجة الكشف" class="btn btn-primary btn-md text-white">
-                             </center>
-                           
+
+
+                            <center>
+                                <input style="text-align: center;border-radius: 4px;font-size: 14px" type="submit" value="تسجيل نتيجة الكشف" class="btn btn-primary btn-md text-white">
+                            </center>
+
 
 
                         </form>
@@ -265,8 +266,8 @@ stmt.close();
                         <form method="get"  action="oculist" class="p-5 bg-white">
 
                             <center><h2  class="h4 text-black mb-5">كشف الرمد</h2> </center>
-                                           <center><div id="wait" class="bg-light" style="display:none;"><img src='demo_wait.gif'  /><br>..جاري تحميل البيانات </div>
-                    </center>
+                            <center><div id="wait" class="bg-light" style="display:none;"><img src='demo_wait.gif'  /><br>..جاري تحميل البيانات </div>
+                            </center>
                             <div style="display: block" id="CoountryDivID" class="row form-group">
 
                                 <div class="col-md-12">
@@ -281,8 +282,8 @@ stmt.close();
                                         %><option value="<%= rs2.getString("lookUp_ID")%>"><%= rs2.getString("description")%></option><%
                                             }
                                             stmt2.close();
-                                            Con.close();
-                                       %>
+                                            
+                                        %>
                                         %>
 
                                     </select>
@@ -290,26 +291,26 @@ stmt.close();
                                 </div>
                             </div>
 
-                                        
-                                              <div class="row form-group">
+
+                            <div class="row form-group">
 
                                 <div class="col-md-12">
                                     <label class="text-black" for="email">رقم جواز السفر</label> 
                                     <input onblur="getName()" name="passNo" type="text" id="passId" class="form-control" required="يرجاء ملئ هذا الحقل">
                                 </div>
                             </div>
-                                        
-                                                   <div style="display: block" id="requestIDsDivFor" class="row form-group">
+
+                            <div style="display: block" id="requestIDsDivFor" class="row form-group">
 
                                 <div class="col-md-12">
                                     <label class="text-black" for="subject">رقم المعاملة</label> 
                                     <select id="requestIDsIDFor"  class="form-control mdb-select colorful-select dropdown-primary"   name="requestIDs"   required="يرجاء ملئ هذا الحقل">
-<!--                                        <option disabled selected value>الحالة الطبية</option>-->
+                                        <!--                                        <option disabled selected value>الحالة الطبية</option>-->
                                     </select>
 
                                 </div>
                             </div>
-                                        
+
                             <div class="row form-group">
                                 <div class="col-md-6 mb-3 mb-md-0">
                                     <label class="text-black" for="fname">العين اليسرى</label>
@@ -325,8 +326,33 @@ stmt.close();
 
                                 <div class="col-md-12">
                                     <label class="text-black" for="subject">النتيجة</label> 
-                                    <select class="form-control" type="tel" spellcheck="false" id="widgetu1609_input" name="result" tabindex="2" data-sizePolicy="fixed" data-pintopage="page_fixedLeft" required="يرجاء ملئ هذا الحقل"><option disabled selected value>نتيجة الكشف</option><option value="acc">لائـق</option>
-                                        <option value="nacc">غير لائـق</option><option value="sacc">لائق بنظارة</option></select>
+                                    <select onclick="showMedicalConditionsFor()" class="form-control" type="tel" spellcheck="false" id="selectedResultIDFor" name="result" tabindex="2" data-sizePolicy="fixed" data-pintopage="page_fixedLeft" required="يرجاء ملئ هذا الحقل"><option disabled selected value>نتيجة الكشف</option><option value="acc">لائـق</option>
+                                        <option value="nacc">غير لائـق</option>
+                                        <option  value="acc">لائق بشرط</option>
+                                    </select>
+
+                                </div>
+                            </div>
+
+                            <div style="display: none" id="MedicalDivIDFor" class="row form-group">
+
+                                <div class="col-md-12">
+                                    <label class="text-black" for="subject">الحالات الطبية</label> 
+                                    <select id="medCondIDFor"  class="form-control mdb-select colorful-select dropdown-primary"   name="medical_conditions"   required="يرجاء ملئ هذا الحقل" multiple>
+                                        <option disabled selected value>الحالة الطبية</option>
+                                        <%
+                              
+                                            Statement stmt3 = null;
+
+                                            stmt3 = Con.createStatement();
+                                            ResultSet rs3 = stmt3.executeQuery("select * from mi.medicalconditions");
+                                            while (rs3.next()) {
+                                        %><option value="<%= rs3.getString("lookUp_ID")%>"><%= rs3.getString("description")%></option><%
+                                            }
+                                            stmt3.close();
+                                        %>
+
+                                    </select>
 
                                 </div>
                             </div>
@@ -340,6 +366,7 @@ stmt.close();
 
                             <div class="row form-group">
                                 <div class="col-md-12">
+                                    <% Con.close(); %>
                                     <input type="submit" value="تسجيل نتيجة الكشف" class="btn btn-primary btn-md text-white">
                                 </div>
                             </div>
@@ -462,6 +489,15 @@ stmt.close();
                     document.getElementById("MedicalDivID").style.display = "block";
                 }
             }
+            function showMedicalConditionsFor() {
+
+
+                var selectBox = document.getElementById("selectedResultIDFor");
+                var selectedIndex = selectBox.selectedIndex;
+                if (selectedIndex == 3) {
+                    document.getElementById("MedicalDivIDFor").style.display = "block";
+                }
+            }
             function showFor() {
 
                 document.getElementById("selectEF").style.display = "none";
@@ -471,66 +507,63 @@ stmt.close();
 
             }
 
-            function getName(){
+            function getName() {
                 $("#wait").css("display", "block");
                 var nid = document.getElementById("nid").value;
-                 var passNo = document.getElementById("passId").value;
-                  var CountryID = document.getElementById("CountryID").value;
+                var passNo = document.getElementById("passId").value;
+                var CountryID = document.getElementById("CountryID").value;
                 var select;
-                if(nid !== '' && nid !== null)
+                if (nid !== '' && nid !== null)
                 {
-                     select = document.getElementById('requestIDsID');
-                            var xhttp = new XMLHttpRequest();
-                xhttp.onreadystatechange = function() {
-                  if (this.readyState == 4 && this.status == 200) {
-                       $("#wait").css("display", "none");
+                    select = document.getElementById('requestIDsID');
+                    var xhttp = new XMLHttpRequest();
+                    xhttp.onreadystatechange = function () {
+                        if (this.readyState == 4 && this.status == 200) {
+                            $("#wait").css("display", "none");
 //                      alert('national ID');
 //                      alert(this.responseText.toString());
-                  //  document.getElementById("citizenNameID").value = this.responseText;
-                    var myObj = JSON.parse(this.responseText.toString());
+                            //  document.getElementById("citizenNameID").value = this.responseText;
+                            var myObj = JSON.parse(this.responseText.toString());
 //                    alert(myObj);
 
-              for (var i = 0; i<myObj.requestIDs.length; i++){
-                  var opt = document.createElement('option');
+                            for (var i = 0; i < myObj.requestIDs.length; i++) {
+                                var opt = document.createElement('option');
 //                  alert(myObj.requestIDs[i]);
-                  opt.value = myObj.requestIDs[i];
-                  opt.innerHTML = myObj.requestIDs[i];
-                  select.appendChild(opt);
-                                          }
-                                document.getElementById("citizenNameID").value = myObj.name;          
-                  }
-                };
-                xhttp.open("GET", "/API/getName?NationalID="+nid, true);
-                xhttp.send();
-                }
-                
-                
-                else if((passNo !== '' && CountryID !== '') && (passNo !== null && CountryID !== null))
+                                opt.value = myObj.requestIDs[i];
+                                opt.innerHTML = myObj.requestIDs[i];
+                                select.appendChild(opt);
+                            }
+                            document.getElementById("citizenNameID").value = myObj.name;
+                        }
+                    };
+                    xhttp.open("GET", "/API/getName?NationalID=" + nid, true);
+                    xhttp.send();
+                } else if ((passNo !== '' && CountryID !== '') && (passNo !== null && CountryID !== null))
                 {
-                      select = document.getElementById('requestIDsIDFor');
-                              var xhttp = new XMLHttpRequest();
-                xhttp.onreadystatechange = function() {
-                  if (this.readyState == 4 && this.status == 200) {
-                       $("#wait").css("display", "none");
+                    select = document.getElementById('requestIDsIDFor');
+                    var xhttp = new XMLHttpRequest();
+                    xhttp.onreadystatechange = function () {
+                        if (this.readyState == 4 && this.status == 200) {
+                            $("#wait").css("display", "none");
 //                      alert(this.responseText.toString());
-                  //  document.getElementById("citizenNameID").value = this.responseText;
-                    var myObj = JSON.parse(this.responseText.toString());
+                            //  document.getElementById("citizenNameID").value = this.responseText;
+                            var myObj = JSON.parse(this.responseText.toString());
 //                    alert(myObj);
 
-              for (var i = 0; i<myObj.requestIDs.length; i++){
-                  var opt = document.createElement('option');
+                            for (var i = 0; i < myObj.requestIDs.length; i++) {
+                                var opt = document.createElement('option');
 //                  alert(myObj.requestIDs[i]);
-                  opt.value = myObj.requestIDs[i];
-                  opt.innerHTML = myObj.requestIDs[i];
-                  select.appendChild(opt);
-                                          }
-                                document.getElementById("citizenNameIDFor").value = myObj.name;          
-                  }
-                };
-                xhttp.open("GET", "/API/getName?theCountry="+CountryID+"&passNo="+passNo, true);
-                xhttp.send();
+                                opt.value = myObj.requestIDs[i];
+                                opt.innerHTML = myObj.requestIDs[i];
+                                select.appendChild(opt);
+                            }
+                            document.getElementById("citizenNameIDFor").value = myObj.name;
+                        }
+                    };
+                    xhttp.open("GET", "/API/getName?theCountry=" + CountryID + "&passNo=" + passNo, true);
+                    xhttp.send();
                 }
- }
+            }
             function goHome() {
 
                 document.getElementById("selectEF").style.display = "block";
