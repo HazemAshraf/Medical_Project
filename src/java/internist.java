@@ -360,7 +360,7 @@ public class internist extends HttpServlet {
             getcon c = new getcon();
             Con = c.myconnection();
             stmt3 = Con.createStatement();
-                 String sqlCehck = "select * from mi.internist_users where USERNAME = '" + name + "' and TRAFFIC_UNIT_CODE = '" + TU + "'";
+                 String sqlCehck = "select * from mi.internist_users where USERNAME = '" + name + "'";
              ResultSet rs7 = stmt3.executeQuery(sqlCehck);
            //      System.out.println("checked username is : " + name);
           //   System.out.println("checked trafficunit is : " + TU);
