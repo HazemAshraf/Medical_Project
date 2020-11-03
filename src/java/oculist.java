@@ -332,7 +332,7 @@ public class oculist extends HttpServlet {
             Con = c.myconnection();
             
                 stmt3 = Con.createStatement();
-                 String sqlCehck = "select * from mi.oculist_users where USERNAME = '" + name + "' and TRAFFIC_UNIT_CODE = '" + TU + "'";
+                 String sqlCehck = "select * from mi.oculist_users where USERNAME = '" + name + "'";
              ResultSet rs7 = stmt3.executeQuery(sqlCehck);
              System.out.println("checked username is : " + name);
              System.out.println("checked trafficunit is : " + TU);
