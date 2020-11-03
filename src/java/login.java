@@ -148,13 +148,14 @@ public class login extends HttpServlet {
 
                     String userName = RS.getString("USERNAME");
                     String name = RS.getString("NAME");
+                    String traffic_unit_code = RS.getString("TRAFFIC_UNIT_CODE");
 //                    String trafficUnit = RS.getString("TRAFFIC_UNIT");
 //                    String trafficUnitCode = RS.getString("TRAFFIC_UNIT_CODE");
 
                     session.setAttribute("USERNAME", userName);
                     session.setAttribute("NAME", name);
                     session.setAttribute("TRAFFIC_UNIT", theUnit);
-                    session.setAttribute("TRAFFIC_UNIT_CODE", theUnit);
+                    session.setAttribute("TRAFFIC_UNIT_CODE", traffic_unit_code);
                     session.setAttribute("TRAFFIC_UNIT_NAME", theUnit);
                     session.setAttribute("NATIONAL_ID", nationalId);
                     session.setAttribute("TYPE", type);
@@ -202,7 +203,7 @@ public class login extends HttpServlet {
                         session.setAttribute("USERNAME", userName);
                         session.setAttribute("NAME", name);
                         session.setAttribute("TRAFFIC_UNIT", theUnit);
-                        session.setAttribute("TRAFFIC_UNIT_CODE", theUnit);
+                        session.setAttribute("TRAFFIC_UNIT_CODE", trafficUnitCode);
                         session.setAttribute("TRAFFIC_UNIT_NAME", theUnit);
                         session.setAttribute("NATIONAL_ID", nationalId);
                         session.setAttribute("TYPE", type);
@@ -252,7 +253,7 @@ public class login extends HttpServlet {
                             session.setAttribute("USERNAME", userName);
                             session.setAttribute("NAME", name);
                             session.setAttribute("TRAFFIC_UNIT", theUnit);
-                            session.setAttribute("TRAFFIC_UNIT_CODE", theUnit);
+                            session.setAttribute("TRAFFIC_UNIT_CODE", trafficUnitCode);
                             session.setAttribute("TRAFFIC_UNIT_NAME", theUnit);
                             session.setAttribute("NATIONAL_ID", nationalId);
                             session.setAttribute("TYPE", type);
