@@ -229,18 +229,20 @@ public class internist extends HttpServlet {
                     Con = c.myconnection();
                     stmt = Con.createStatement();
                     int updated = stmt.executeUpdate("insert into mi.log_success (response,requestID) values ('" + response.toString() + "' , '" + requestID + "')");
-                      int updated1 = stmt.executeUpdate("update mi.clients_data set notified = 1 where requestID = '"+requestID+"'");
+                    int updated1 = stmt.executeUpdate("update mi.clients_data set notified = 1 where requestID = '" + requestID + "'");
                     stmt.close();
                     Con.close();
                     return 0;
                 } else {
-                   int codeReturn = 1;
-                    if(response.toString().contains("\"errorCode\":-4")) codeReturn = -4;
+                    int codeReturn = 1;
+                    if (response.toString().contains("\"errorCode\":-4")) {
+                        codeReturn = -4;
+                    }
                     //write to database that this faild notified request
                     Con = c.myconnection();
                     stmt = Con.createStatement();
                     int updated = stmt.executeUpdate("insert into mi.log_faild (response,requestID) values ('" + response.toString() + "' , '" + requestID + "')");
-                      int updated1 = stmt.executeUpdate("update mi.clients_data set notified = 0 where requestID = '"+requestID+"'");
+                    int updated1 = stmt.executeUpdate("update mi.clients_data set notified = 0 where requestID = '" + requestID + "'");
                     stmt.close();
                     Con.close();
                     return codeReturn;
@@ -252,7 +254,7 @@ public class internist extends HttpServlet {
             Con = c.myconnection();
             stmt = Con.createStatement();
             int updated = stmt.executeUpdate("insert into mi.log_faild (response,requestID) values ('NO JSON COME FROM OTHER SIDE' , '" + requestID + "')");
-              int updated1 = stmt.executeUpdate("update mi.clients_data set notified = -1 where requestID = '"+requestID+"'");
+            int updated1 = stmt.executeUpdate("update mi.clients_data set notified = -1 where requestID = '" + requestID + "'");
             stmt.close();
             Con.close();
             return -1;
@@ -266,6 +268,14 @@ public class internist extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
 
+            
+            // validate current session 
+            
+                 String name = request.getSession().getAttribute("USERNAME").toString();
+                    // get logged trafic_unit
+                    String TU = request.getSession().getAttribute("TRAFFIC_UNIT_CODE").toString();
+                    
+                   
             String nationalID = request.getParameter("transID");
             String requestID_UI = request.getParameter("requestIDs");
             //  System.out.println("requestID from UI  :  " + requestID_UI);
@@ -345,14 +355,36 @@ public class internist extends HttpServlet {
             String transID = "";
 
             Connection Con = null;
-            Statement stmt = null, stmt1 = null, stmt2 = null;
+            Statement stmt = null, stmt1 = null, stmt2 = null,stmt3;
 
             getcon c = new getcon();
             Con = c.myconnection();
-
+            stmt3 = Con.createStatement();
+                 String sqlCehck = "select * from mi.internist_users where USERNAME = '" + name + "' and TRAFFIC_UNIT_CODE = '" + TU + "'";
+             ResultSet rs7 = stmt3.executeQuery(sqlCehck);
+           //      System.out.println("checked username is : " + name);
+          //   System.out.println("checked trafficunit is : " + TU);
+             if(rs7.next() == false){
+                // System.out.println("not authorized for this username : '"+name+"' , please login again");
+                           out.println("<script type='text/javascript'>");
+                        out.println("var alertt = 'not authorized action for username : "+name+" , please login again';"); 
+                    out.println("alert(alertt.toString());");
+                     //out.println("alert('"+name+"');");
+                    out.println("location='index.jsp';");
+                    out.println("</script>");
+                 stmt3.close();
+                 Con.close();
+                 return;
+             }
+            
             stmt = Con.createStatement();
             stmt1 = Con.createStatement();
-			stmt2 = Con.createStatement();
+            stmt2 = Con.createStatement();
+            
+            
+            
+        
+             
             // System.err.println(transID);
             String sql = "";
             //  System.out.println("Composite key is = > " + theCountry + passNo);
@@ -395,7 +427,6 @@ public class internist extends HttpServlet {
                     return;
 
                 }
-  
 
                 //get personal information
                 nationality = rs.getString("nationality");
@@ -480,46 +511,47 @@ public class internist extends HttpServlet {
             if (result.equals("nacc")) {
                 stmt.executeUpdate("update `clients_data` set `blood_group` = '" + blood_group + "' , `internal_inspection_result` = '" + result + "' , `inspection_status` = 'N' , `internal_inspection_date` = '" + internal_request_date + "' where `requestID` ='" + requestID + "'");
                 if (eyeNotAcc) {
-                     sql = "select photo from mi.clients_photos where requestID = '" + requestID_UI + "'";
-                        ResultSet rs1 = stmt1.executeQuery(sql);
-                        if (rs1.first()) {
-                            Blob b = rs1.getBlob("photo");
-                            byte[] ba = b.getBytes(1, (int) b.length());
-                            photo64 = new String(ba);
-                        }
-                        stmt1.close();
+                    sql = "select photo from mi.clients_photos where requestID = '" + requestID_UI + "'";
+                    ResultSet rs1 = stmt1.executeQuery(sql);
+                    if (rs1.first()) {
+                        Blob b = rs1.getBlob("photo");
+                        byte[] ba = b.getBytes(1, (int) b.length());
+                        photo64 = new String(ba);
+                    }
+                    stmt1.close();
                     String json = "";
                     String final_medical_cond = "[]";
                     if (medical_conditions_str != null) {
-                    final_medical_cond = medical_conditions_str;
+                        final_medical_cond = medical_conditions_str;
                     }
 //                    if (medical_conditions_str != null) {
-                        // json = "{\"header\": {\"version\": \"1.0\",\"category\": \"request\",\"service\": \" TIT_Medical_Results \",\"timestamp\": \"03-09-2018 13:19\",\"tid\": \"594f2c57-e0d6-4311-87ffac491c4337dd\"},\"body\": {\"RequestID\": " + requestID + ",\"MedicalCheckupID\": \"" + transID + "\",\"MedicalCheckupDate\": \"" + internal_request_date + "\",\"MedicalCheckupResults\": 2,\"MedicalCheckupPhoto\": \"" + photo64 + "\",\"BloodGroup\": \"\",\"BioPath\": \"" + bioPath + "\",\"MedicalConditions\": " + medical_conditions_str + "}}";
+                    // json = "{\"header\": {\"version\": \"1.0\",\"category\": \"request\",\"service\": \" TIT_Medical_Results \",\"timestamp\": \"03-09-2018 13:19\",\"tid\": \"594f2c57-e0d6-4311-87ffac491c4337dd\"},\"body\": {\"RequestID\": " + requestID + ",\"MedicalCheckupID\": \"" + transID + "\",\"MedicalCheckupDate\": \"" + internal_request_date + "\",\"MedicalCheckupResults\": 2,\"MedicalCheckupPhoto\": \"" + photo64 + "\",\"BloodGroup\": \"\",\"BioPath\": \"" + bioPath + "\",\"MedicalConditions\": " + medical_conditions_str + "}}";
 
-                        json = "{\"header\": {\"version\": \"1.0\",\"category\": \"request\",\"service\": \" TIT_Medical_Results \",\"timestamp\": \"03-09-2018 13:19\",\"tid\": \"594f2c57-e0d6-4311-87ffac491c4337dd\"},\"body\": {\"RequestID\": " + requestID + ",\"MedicalCheckupID\": \"" + transID + "\",\"MedicalCheckupDate\": \"" + internal_request_date + "\",\"MedicalCheckupResults\": 2,\"MedicalCheckupPhoto\": \"" + photo64 + "\",\"BloodGroup\": \"" + blood_group + "\",\"BioPath\": \"\",\"MedicalConditions\": " + final_medical_cond + "}}";
+                    json = "{\"header\": {\"version\": \"1.0\",\"category\": \"request\",\"service\": \" TIT_Medical_Results \",\"timestamp\": \"03-09-2018 13:19\",\"tid\": \"594f2c57-e0d6-4311-87ffac491c4337dd\"},\"body\": {\"RequestID\": " + requestID + ",\"MedicalCheckupID\": \"" + transID + "\",\"MedicalCheckupDate\": \"" + internal_request_date + "\",\"MedicalCheckupResults\": 2,\"MedicalCheckupPhoto\": \"" + photo64 + "\",\"BloodGroup\": \"" + blood_group + "\",\"BioPath\": \"\",\"MedicalConditions\": " + final_medical_cond + "}}";
 //                    } else {
-                        //json = "{\"header\": {\"version\": \"1.0\",\"category\": \"request\",\"service\": \" TIT_Medical_Results \",\"timestamp\": \"03-09-2018 13:19\",\"tid\": \"594f2c57-e0d6-4311-87ffac491c4337dd\"},\"body\": {\"RequestID\": " + requestID + ",\"MedicalCheckupID\": \"" + transID + "\",\"MedicalCheckupDate\": \"" + internal_request_date + "\",\"MedicalCheckupResults\": 2,\"MedicalCheckupPhoto\": \"" + photo64 + "\",\"BloodGroup\": \"\",\"BioPath\": \"" + bioPath + "\",\"MedicalConditions\": []}}";
+                    //json = "{\"header\": {\"version\": \"1.0\",\"category\": \"request\",\"service\": \" TIT_Medical_Results \",\"timestamp\": \"03-09-2018 13:19\",\"tid\": \"594f2c57-e0d6-4311-87ffac491c4337dd\"},\"body\": {\"RequestID\": " + requestID + ",\"MedicalCheckupID\": \"" + transID + "\",\"MedicalCheckupDate\": \"" + internal_request_date + "\",\"MedicalCheckupResults\": 2,\"MedicalCheckupPhoto\": \"" + photo64 + "\",\"BloodGroup\": \"\",\"BioPath\": \"" + bioPath + "\",\"MedicalConditions\": []}}";
 
-                     //   json = "{\"header\": {\"version\": \"1.0\",\"category\": \"request\",\"service\": \" TIT_Medical_Results \",\"timestamp\": \"03-09-2018 13:19\",\"tid\": \"594f2c57-e0d6-4311-87ffac491c4337dd\"},\"body\": {\"RequestID\": " + requestID + ",\"MedicalCheckupID\": \"" + transID + "\",\"MedicalCheckupDate\": \"" + internal_request_date + "\",\"MedicalCheckupResults\": 2,\"MedicalCheckupPhoto\": \"" + photo64 + "\",\"BloodGroup\": \"" + blood_group + "\",\"BioPath\": \"\",\"MedicalConditions\": []}}";
-
+                    //   json = "{\"header\": {\"version\": \"1.0\",\"category\": \"request\",\"service\": \" TIT_Medical_Results \",\"timestamp\": \"03-09-2018 13:19\",\"tid\": \"594f2c57-e0d6-4311-87ffac491c4337dd\"},\"body\": {\"RequestID\": " + requestID + ",\"MedicalCheckupID\": \"" + transID + "\",\"MedicalCheckupDate\": \"" + internal_request_date + "\",\"MedicalCheckupResults\": 2,\"MedicalCheckupPhoto\": \"" + photo64 + "\",\"BloodGroup\": \"" + blood_group + "\",\"BioPath\": \"\",\"MedicalConditions\": []}}";
 //                    }
-                    String jsonRequest = "{\"header\": {\"version\": \"1.0\",\"category\": \"request\",\"service\": \" TIT_Medical_Results \",\"timestamp\": \"03-09-2018 13:19\",\"tid\": \"594f2c57-e0d6-4311-87ffac491c4337dd\"},\"body\": {\"RequestID\": " + requestID + ",\"MedicalCheckupID\": \"" + transID + "\",\"MedicalCheckupDate\": \"" + internal_request_date + "\",\"MedicalCheckupResults\": 2,\"MedicalCheckupPhoto\": \"\",\"BloodGroup\": \"" + blood_group + "\",\"BioPath\": \"\",\"MedicalConditions\": "+final_medical_cond+"}}";
+                    String jsonRequest = "{\"header\": {\"version\": \"1.0\",\"category\": \"request\",\"service\": \" TIT_Medical_Results \",\"timestamp\": \"03-09-2018 13:19\",\"tid\": \"594f2c57-e0d6-4311-87ffac491c4337dd\"},\"body\": {\"RequestID\": " + requestID + ",\"MedicalCheckupID\": \"" + transID + "\",\"MedicalCheckupDate\": \"" + internal_request_date + "\",\"MedicalCheckupResults\": 2,\"MedicalCheckupPhoto\": \"\",\"BloodGroup\": \"" + blood_group + "\",\"BioPath\": \"\",\"MedicalConditions\": " + final_medical_cond + "}}";
 
                     Statement stmt5 = null;
 
                     stmt5 = Con.createStatement();
                     int updated = stmt5.executeUpdate("insert into mi.log_success_request (request,requestID) values ('" + jsonRequest + "' , '" + requestID + "')");
-                              // log this transaction 
+                    // internist.java
+
+                    // log this transaction 
                     // get logged username
-                    String name = request.getSession().getAttribute("NAME").toString();
+                 //   String name = request.getSession().getAttribute("USERNAME").toString();
                     // get logged trafic_unit
-                    String TU = request.getSession().getAttribute("TRAFFIC_UNIT").toString();
+                   // String TU = request.getSession().getAttribute("TRAFFIC_UNIT").toString();
                     // update log table 
-                    sql = "insert into mi.internist_log(username,traffic_unit,requestID) values('" + name + "','" + TU + "','" + requestID + "');";
+                    sql = "insert into mi.internist_log(username,traffic_unit,requestID,json_notified) values('" + name + "','" + TU + "','" + requestID + "','"+jsonRequest+"');";
                     int inserted = stmt2.executeUpdate(sql);
                     stmt2.close();
                     ///////////////////////////////////////////////////////////
-					stmt5.close();
+                    stmt5.close();
                     stmt.close();
                     Con.close();
                     int res = sendPOST("http://" + IP + "/" + API_CTX + "/API/MedicalCheckup/NotifyResults", json, requestID);
@@ -547,9 +579,8 @@ public class internist extends HttpServlet {
 
                         return;
 
-                    }
-                     else if (res == -4){
-                         out.println("there is error in inputs");
+                    } else if (res == -4) {
+                        out.println("there is error in inputs");
                         //  System.out.println("1");
                         out.println("<script type='text/javascript'>");
 
@@ -558,8 +589,7 @@ public class internist extends HttpServlet {
                         out.println("</script>");
 
                         return;
-                    }
-                     else {
+                    } else {
                         out.println("otherwise error");
                         //   System.out.println("not 1 or 0 response error message code");
                         //   System.out.println("Error -> NOT 200 OK response");
@@ -575,17 +605,19 @@ public class internist extends HttpServlet {
             } else {
                 if (eyeInspRes.isEmpty()) {
                     stmt.executeUpdate("update `clients_data` set `medical_conditions` = '" + medical_conditions_str + "' , `blood_group` = '" + blood_group + "' , `internal_inspection_result` = '" + result + "' , `inspection_status` = 'W' , `internal_inspection_date` = '" + internal_request_date + "' where `requestID` ='" + requestID + "'");
-					          // log this transaction 
+                    // internist.java
+                    String jsonRequest = "medical_conditions = " + medical_conditions_str + ", blood_group = " + blood_group + ", internal_inspection_result = " + result + ", inspection_status = W , internal_inspection_date = " + internal_request_date + "";
+                    // log this transaction 
                     // get logged username
-                    String name = request.getSession().getAttribute("NAME").toString();
+                //    String name = request.getSession().getAttribute("USERNAME").toString();
                     // get logged trafic_unit
-                    String TU = request.getSession().getAttribute("TRAFFIC_UNIT").toString();
+                   // String TU = request.getSession().getAttribute("TRAFFIC_UNIT").toString();
                     // update log table 
-                    sql = "insert into mi.internist_log(username,traffic_unit,requestID) values('" + name + "','" + TU + "','" + requestID + "');";
+                    sql = "insert into mi.internist_log(username,traffic_unit,requestID,json_notified) values('" + name + "','" + TU + "','" + requestID + "','"+jsonRequest+"');";
                     int inserted = stmt2.executeUpdate(sql);
                     stmt2.close();
                     ///////////////////////////////////////////////////////////
-			  } else {
+                } else {
                     if ((eyeInspRes.equals("acc") && result.equals("acc")) || (eyeInspRes.equals("sacc") && result.equals("acc")) || ((eyeInspRes.equals("acc") && result.equals("sacc"))) || ((eyeInspRes.equals("sacc") && result.equals("sacc")))) {
                         stmt.executeUpdate("update `clients_data` set `medical_conditions` = '" + medical_conditions_str + "' , `blood_group` = '" + blood_group + "' , `internal_inspection_result` = '" + result + "' , `inspection_status` = 'C' , `internal_inspection_date` = '" + internal_request_date + "' where `requestID` ='" + requestID + "'");
                         //
@@ -598,20 +630,19 @@ public class internist extends HttpServlet {
                         }
                         stmt1.close();
                         String json = "";
-                           String final_medical_cond = "[]";
-                    if (medical_conditions_str != null) {
-                    final_medical_cond = medical_conditions_str;
-                    }
-                     //   if (medical_conditions_str != null) {
-                            //json = "{\"header\": {\"version\": \"1.0\",\"category\": \"request\",\"service\": \" TIT_Medical_Results \",\"timestamp\": \"03-09-2018 13:19\",\"tid\": \"594f2c57-e0d6-4311-87ffac491c4337dd\"},\"body\": {\"RequestID\": " + requestID + ",\"MedicalCheckupID\": \"" + transID + "\",\"MedicalCheckupDate\": \"" + internal_request_date + "\",\"MedicalCheckupResults\": 1,\"MedicalCheckupPhoto\": \"" + photo64 + "\",\"BloodGroup\": \"\",\"BioPath\": \"" + bioPath + "\",\"MedicalConditions\": " + medical_conditions_str + "}}";
+                        String final_medical_cond = "[]";
+                        if (medical_conditions_str != null) {
+                            final_medical_cond = medical_conditions_str;
+                        }
+                        //   if (medical_conditions_str != null) {
+                        //json = "{\"header\": {\"version\": \"1.0\",\"category\": \"request\",\"service\": \" TIT_Medical_Results \",\"timestamp\": \"03-09-2018 13:19\",\"tid\": \"594f2c57-e0d6-4311-87ffac491c4337dd\"},\"body\": {\"RequestID\": " + requestID + ",\"MedicalCheckupID\": \"" + transID + "\",\"MedicalCheckupDate\": \"" + internal_request_date + "\",\"MedicalCheckupResults\": 1,\"MedicalCheckupPhoto\": \"" + photo64 + "\",\"BloodGroup\": \"\",\"BioPath\": \"" + bioPath + "\",\"MedicalConditions\": " + medical_conditions_str + "}}";
 
-                            json = "{\"header\": {\"version\": \"1.0\",\"category\": \"request\",\"service\": \" TIT_Medical_Results \",\"timestamp\": \"03-09-2018 13:19\",\"tid\": \"594f2c57-e0d6-4311-87ffac491c4337dd\"},\"body\": {\"RequestID\": " + requestID + ",\"MedicalCheckupID\": \"" + transID + "\",\"MedicalCheckupDate\": \"" + internal_request_date + "\",\"MedicalCheckupResults\": 1,\"MedicalCheckupPhoto\": \"" + photo64 + "\",\"BloodGroup\": \"" + blood_group + "\",\"BioPath\": \"\",\"MedicalConditions\": " + final_medical_cond + "}}";
-                       // } else {
-                            // json = "{\"header\": {\"version\": \"1.0\",\"category\": \"request\",\"service\": \" TIT_Medical_Results \",\"timestamp\": \"03-09-2018 13:19\",\"tid\": \"594f2c57-e0d6-4311-87ffac491c4337dd\"},\"body\": {\"RequestID\": " + requestID + ",\"MedicalCheckupID\": \"" + transID + "\",\"MedicalCheckupDate\": \"" + internal_request_date + "\",\"MedicalCheckupResults\": 1,\"MedicalCheckupPhoto\": \"" + photo64 + "\",\"BloodGroup\": \"\",\"BioPath\": \"" + bioPath + "\",\"MedicalConditions\": []}}";
+                        json = "{\"header\": {\"version\": \"1.0\",\"category\": \"request\",\"service\": \" TIT_Medical_Results \",\"timestamp\": \"03-09-2018 13:19\",\"tid\": \"594f2c57-e0d6-4311-87ffac491c4337dd\"},\"body\": {\"RequestID\": " + requestID + ",\"MedicalCheckupID\": \"" + transID + "\",\"MedicalCheckupDate\": \"" + internal_request_date + "\",\"MedicalCheckupResults\": 1,\"MedicalCheckupPhoto\": \"" + photo64 + "\",\"BloodGroup\": \"" + blood_group + "\",\"BioPath\": \"\",\"MedicalConditions\": " + final_medical_cond + "}}";
+                        // } else {
+                        // json = "{\"header\": {\"version\": \"1.0\",\"category\": \"request\",\"service\": \" TIT_Medical_Results \",\"timestamp\": \"03-09-2018 13:19\",\"tid\": \"594f2c57-e0d6-4311-87ffac491c4337dd\"},\"body\": {\"RequestID\": " + requestID + ",\"MedicalCheckupID\": \"" + transID + "\",\"MedicalCheckupDate\": \"" + internal_request_date + "\",\"MedicalCheckupResults\": 1,\"MedicalCheckupPhoto\": \"" + photo64 + "\",\"BloodGroup\": \"\",\"BioPath\": \"" + bioPath + "\",\"MedicalConditions\": []}}";
 
-                          //  json = "{\"header\": {\"version\": \"1.0\",\"category\": \"request\",\"service\": \" TIT_Medical_Results \",\"timestamp\": \"03-09-2018 13:19\",\"tid\": \"594f2c57-e0d6-4311-87ffac491c4337dd\"},\"body\": {\"RequestID\": " + requestID + ",\"MedicalCheckupID\": \"" + transID + "\",\"MedicalCheckupDate\": \"" + internal_request_date + "\",\"MedicalCheckupResults\": 1,\"MedicalCheckupPhoto\": \"" + photo64 + "\",\"BloodGroup\": \"" + blood_group + "\",\"BioPath\": \"\",\"MedicalConditions\": []}}";
-
-                       // }
+                        //  json = "{\"header\": {\"version\": \"1.0\",\"category\": \"request\",\"service\": \" TIT_Medical_Results \",\"timestamp\": \"03-09-2018 13:19\",\"tid\": \"594f2c57-e0d6-4311-87ffac491c4337dd\"},\"body\": {\"RequestID\": " + requestID + ",\"MedicalCheckupID\": \"" + transID + "\",\"MedicalCheckupDate\": \"" + internal_request_date + "\",\"MedicalCheckupResults\": 1,\"MedicalCheckupPhoto\": \"" + photo64 + "\",\"BloodGroup\": \"" + blood_group + "\",\"BioPath\": \"\",\"MedicalConditions\": []}}";
+                        // }
 //                        String medicalCond = "";
 //                        if (medical_conditions_str != null) {
 //                            medicalCond = medical_conditions_str;
@@ -622,17 +653,20 @@ public class internist extends HttpServlet {
 
                         stmt6 = Con.createStatement();
                         int updated = stmt6.executeUpdate("insert into mi.log_success_request (request,requestID) values ('" + jsonRequest + "' , '" + requestID + "')");
-                                  // log this transaction 
-                    // get logged username
-                    String name = request.getSession().getAttribute("NAME").toString();
-                    // get logged trafic_unit
-                    String TU = request.getSession().getAttribute("TRAFFIC_UNIT").toString();
-                    // update log table 
-                    sql = "insert into mi.internist_log(username,traffic_unit,requestID) values('" + name + "','" + TU + "','" + requestID + "');";
-                    int inserted = stmt2.executeUpdate(sql);
-                    stmt2.close();
-                    ///////////////////////////////////////////////////////////
-						stmt6.close();
+
+                        // internist.java
+                        // log this transaction 
+                        // get logged username
+                      //  String name = request.getSession().getAttribute("USERNAME").toString();
+                        // get logged trafic_unit
+                       // String TU = request.getSession().getAttribute("TRAFFIC_UNIT").toString();
+                        // update log table 
+                        sql = "insert into mi.internist_log(username,traffic_unit,requestID,json_notified) values('" + name + "','" + TU + "','" + requestID + "','"+jsonRequest+"');";
+                        int inserted = stmt2.executeUpdate(sql);
+                        stmt2.close();
+                        ///////////////////////////////////////////////////////////
+
+                        stmt6.close();
                         stmt.close();
                         Con.close();
 
@@ -661,19 +695,17 @@ public class internist extends HttpServlet {
                             out.println("</script>");
 
                             return;
-                        }
-                         else if (res == -4){
-                         out.println("there is error in inputs");
-                        //  System.out.println("1");
-                        out.println("<script type='text/javascript'>");
+                        } else if (res == -4) {
+                            out.println("there is error in inputs");
+                            //  System.out.println("1");
+                            out.println("<script type='text/javascript'>");
 
-                        out.println("alert('  برجاء التواصل مع نظام التراخيص لعدم ارسال الفحص حيث انه تم الرد من قبل علي هذه المعاملة');");
-                        out.println("location='oculist.jsp';");
-                        out.println("</script>");
+                            out.println("alert('  برجاء التواصل مع نظام التراخيص لعدم ارسال الفحص حيث انه تم الرد من قبل علي هذه المعاملة');");
+                            out.println("location='oculist.jsp';");
+                            out.println("</script>");
 
-                        return;
-                    }
-                         else {
+                            return;
+                        } else {
                             out.println("otherwise error");
                             //      System.out.println("not 1 or 0 response error message code");
                             //     System.out.println("Error -> NOT 200 OK response");
