@@ -276,7 +276,9 @@ public class oculist extends HttpServlet {
         }
 
         try (PrintWriter out = response.getWriter()) {
-
+               String name = request.getSession().getAttribute("USERNAME").toString();
+                    // get logged trafic_unit
+                    String TU = request.getSession().getAttribute("TRAFFIC_UNIT_CODE").toString();
             String nationalID = request.getParameter("transID");
             String requestID_UI = request.getParameter("requestIDs");
             System.out.println("requestID from UI  :  " + requestID_UI);
@@ -308,7 +310,6 @@ public class oculist extends HttpServlet {
                 medical_conditions_sb.append("[");
                 for (int i = 0; i < medical_conditions.length; i++) {
                     if (i != medical_conditions.length - 1) {
-                        ;
                         medical_conditions_sb.append("{\"Condition\":\"" + medical_conditions[i] + "\",\"Condition_ExInfo\":\"\"}").append(",");
                     } else {
                         medical_conditions_sb.append("{\"Condition\":\"" + medical_conditions[i] + "\",\"Condition_ExInfo\":\"\"}");
@@ -325,12 +326,31 @@ public class oculist extends HttpServlet {
             String transID = "";
 
             Connection Con = null;
-            Statement stmt = null, stmt1 = null;
+            Statement stmt = null, stmt1 = null , stmt2 = null,stmt3=null;
 
             getcon c = new getcon();
             Con = c.myconnection();
+            
+                stmt3 = Con.createStatement();
+                 String sqlCehck = "select * from mi.oculist_users where USERNAME = '" + name + "' and TRAFFIC_UNIT_CODE = '" + TU + "'";
+             ResultSet rs7 = stmt3.executeQuery(sqlCehck);
+             System.out.println("checked username is : " + name);
+             System.out.println("checked trafficunit is : " + TU);
+             if(rs7.next() == false){
+           //      System.out.println("not authorized for this username : '"+name+"' , please login again");
+                out.println("<script type='text/javascript'>");
+                        out.println("var alertt = 'not authorized action for username : "+name+" , please login again';"); 
+                    out.println("alert(alertt.toString());");
+                     //out.println("alert('"+name+"');");
+                    out.println("location='index.jsp';");
+                    out.println("</script>");
+                 stmt3.close();
+                 Con.close();
+                 return;
+             }
             stmt = Con.createStatement();
             stmt1 = Con.createStatement();
+            stmt2 = Con.createStatement();
             String sql = "";
 
             sql = "select requestID,MedicalCheckupID,request_date,nationality,national_id,PassportNo,eyes_inspection_result,internal_inspection_result,blood_group,hasPhoto from mi.clients_data where requestID = '" + requestID_UI + "'";
@@ -478,6 +498,19 @@ public class oculist extends HttpServlet {
 
                     stmt5 = Con.createStatement();
                     int updated = stmt5.executeUpdate("insert into mi.log_success_request (request,requestID) values ('" + jsonRequest + "' , '" + requestID + "')");
+                   
+                    // oculist.java
+
+            // log this transaction 
+            // get logged username
+           // String name = request.getSession().getAttribute("USERNAME").toString();
+            // get logged trafic_unit
+           // String TU = request.getSession().getAttribute("TRAFFIC_UNIT").toString();
+            // update log table 
+            sql = "insert into mi.oculist_log(username,traffic_unit,requestID,json_notified) values('"+name+"','"+TU+"','"+requestID+"','"+jsonRequest+"');";
+            int inserted = stmt2.executeUpdate(sql);
+            stmt2.close();
+            ///////////////////////////////////////////////////////////
                     stmt5.close();
                     stmt.close();
                     Con.close();
@@ -532,6 +565,18 @@ public class oculist extends HttpServlet {
             } else {
                 if (internInspRes.isEmpty()) {
                     stmt.executeUpdate("update `clients_data` set `medical_conditions` = '" + medical_conditions_str + "' , `eyes_inspection_result` = '" + result + "' , `inspection_status` = 'W' , `eyes_exam_date` = '" + eye_request_date + "' , `right_eye_degree` = '" + Reye + "' , `left_eye_degree` = '" + Leye + "' where `requestID` ='" + requestID + "'");
+                    // oculist.java
+String jsonRequest = "medical_conditions = " + medical_conditions_str + " , eyes_inspection_result = " + result + " , inspection_status = W , eyes_exam_date = " + eye_request_date + " , right_eye_degree = " + Reye + " , left_eye_degree = " + Leye + "";
+            // log this transaction 
+            // get logged username
+//            String name = request.getSession().getAttribute("USERNAME").toString();
+            // get logged trafic_unit
+        //    String TU = request.getSession().getAttribute("TRAFFIC_UNIT").toString();
+            // update log table 
+            sql = "insert into mi.oculist_log(username,traffic_unit,requestID,json_notified) values('"+name+"','"+TU+"','"+requestID+"','"+jsonRequest+"');";
+            int inserted = stmt2.executeUpdate(sql);
+            stmt2.close();
+            ///////////////////////////////////////////////////////////
                 } else {
                     if ((internInspRes.equals("acc") && result.equals("acc")) || (internInspRes.equals("sacc") && result.equals("acc")) || (internInspRes.equals("acc") && result.equals("sacc")) || (internInspRes.equals("sacc") && result.equals("sacc"))) {
                         stmt.executeUpdate("update `clients_data` set `medical_conditions` = '" + medical_conditions_str + "' , `eyes_inspection_result` = '" + result + "' , `inspection_status` = 'C' , `eyes_exam_date` = '" + eye_request_date + "' , `right_eye_degree` = '" + Reye + "' , `left_eye_degree` = '" + Leye + "' where `requestID` ='" + requestID + "'");
@@ -570,6 +615,18 @@ public class oculist extends HttpServlet {
 
                         stmt5 = Con.createStatement();
                         int updated = stmt5.executeUpdate("insert into mi.log_success_request (request,requestID) values ('" + jsonRequest + "' , '" + requestID + "')");
+                       // oculist.java
+
+            // log this transaction 
+            // get logged username
+          //  String name = request.getSession().getAttribute("USERNAME").toString();
+            // get logged trafic_unit
+          //  String TU = request.getSession().getAttribute("TRAFFIC_UNIT").toString();
+            // update log table 
+            sql = "insert into mi.oculist_log(username,traffic_unit,requestID,json_notified) values('"+name+"','"+TU+"','"+requestID+"','"+jsonRequest+"');";
+            int inserted = stmt2.executeUpdate(sql);
+            stmt2.close();
+            ///////////////////////////////////////////////////////////
                         stmt5.close();
                         stmt.close();
                         Con.close();

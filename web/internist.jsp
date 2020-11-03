@@ -29,7 +29,11 @@
 
     </head>
     <body>
-        <input type="hidden" id="traffic_unit_code" value="<%= request.getSession().getAttribute("TRAFFIC_UNIT_CODE").toString()%>" />
+        <%            Connection Con = null;
+                      getcon c = new getcon();
+                      Con = c.myconnection();
+        %>
+        <input type="hidden"  id="traffic_unit_code" value="<%= request.getSession().getAttribute("TRAFFIC_UNIT_CODE").toString()%>" />
         <div class="site-wrap">
 
             <div class="site-mobile-menu">
@@ -208,11 +212,9 @@
                                     <select id="medCondID"  class="form-control mdb-select colorful-select dropdown-primary"   name="medical_conditions"   required="يرجاء ملئ هذا الحقل" multiple>
                                         <option disabled selected value>الحالة الطبية</option>
                                         <%
-                                            Connection Con = null;
+                                            
                                             Statement stmt = null;
-
-                                            getcon c = new getcon();
-                                            Con = c.myconnection();
+                                          
                                             stmt = Con.createStatement();
                                             ResultSet rs = stmt.executeQuery("select * from mi.medicalconditions");
                                             while (rs.next()) {
@@ -289,8 +291,8 @@
 
                             <center><h2  class="h4 text-black mb-5">الكشـف الباطني</h2> </center>
                             <br>
-                                    <center><div id="wait" class="bg-light" style="display:none;"><img src='demo_wait.gif'  /><br>..جاري تحميل البيانات </div>
-                    </center>
+                            <center><div id="wait" class="bg-light" style="display:none;"><img src='demo_wait.gif'  /><br>..جاري تحميل البيانات </div>
+                            </center>
 
                             <!--                            <div class="row form-group">
                                                             <div class="col-md-6 mb-3 mb-md-0">
@@ -379,7 +381,7 @@
                                         %><option value="<%= rs5.getString("lookUp_ID")%>"><%= rs5.getString("description")%></option><%
                                             }
                                             stmt5.close();
-                                            Con.close();
+                                           
                                         %>
 
                                     </select>
@@ -391,8 +393,36 @@
 
                                 <div class="col-md-12">
                                     <label class="text-black" for="subject">النتيجة</label> 
-                                    <select class="form-control" type="tel" spellcheck="false" id="widgetu1609_input" name="result" tabindex="2" data-sizePolicy="fixed" data-pintopage="page_fixedLeft" required="يرجاء ملئ هذا الحقل"><option disabled selected value>نتيجة الكشف</option><option value="acc">لائـق</option>
-                                        <option value="nacc">غير لائـق</option><option value="sacc">كوميسيون</option></select>
+                                    <select onclick="showMedicalConditionsFor()" class="form-control" type="tel" spellcheck="false" id="selectedResultIDFor" name="result" tabindex="2" data-sizePolicy="fixed" data-pintopage="page_fixedLeft" required="يرجاء ملئ هذا الحقل"><option disabled selected value>نتيجة الكشف</option>
+                                        <option value="acc">لائـق</option>
+                                        <option value="nacc">غير لائـق</option>
+                                        <option  value="acc">لائق بشرط</option>
+                                    </select>
+
+                                </div>
+                            </div>
+
+                            <div style="display: none" id="MedicalDivIDFor" class="row form-group">
+
+                                <div class="col-md-12">
+                                    <label class="text-black" for="subject">الحالات الطبية</label> 
+                                    <select id="medCondIDFor"  class="form-control mdb-select colorful-select dropdown-primary"   name="medical_conditions"   required="يرجاء ملئ هذا الحقل" multiple>
+                                        <option disabled selected value>الحالة الطبية</option>
+                                        <%
+                                            
+                                            Statement stmt1 = null;
+
+                                         
+                                            stmt1 = Con.createStatement();
+                                            ResultSet rs1 = stmt1.executeQuery("select * from mi.medicalconditions");
+                                            while (rs1.next()) {
+                                        %><option value="<%= rs1.getString("lookUp_ID")%>"> <%= rs1.getString("description")%> </option><%
+                                            }
+                                            stmt1.close();
+                                           
+                                        %>
+
+                                    </select>
 
                                 </div>
                             </div>
@@ -405,6 +435,7 @@
                             </div>
 
                             <center>
+                                <%  Con.close(); %>
                                 <input style="text-align: center;border-radius: 4px;font-size: 14px" type="submit" value="تسجيل نتيجة الكشف" class="btn btn-primary btn-md text-white">
                             </center>
 
@@ -513,23 +544,23 @@
 
 
                 var xhttp = new XMLHttpRequest();
-               
+
                 xhttp.onreadystatechange = function () {
                     alert(this.status);
                     if (this.status !== 200) {
                         alert("يوجد عطل بالإتصال بالخادم يرجى اعاده المحاولة");
                         event.preventDefault();
-                       
+
                         return false;
                     }
-                     };
-                     xhttp.open("GET", "/API/internist", true);
-                    xhttp.send();
-                }
+                };
+                xhttp.open("GET", "/API/internist", true);
+                xhttp.send();
+            }
 
 
 
-            
+
             function showEgy() {
 
 
@@ -604,6 +635,15 @@
                 var selectedIndex = selectBox.selectedIndex;
                 if (selectedIndex == 3) {
                     document.getElementById("MedicalDivID").style.display = "block";
+                }
+            }
+            function showMedicalConditionsFor() {
+
+
+                var selectBox = document.getElementById("selectedResultIDFor");
+                var selectedIndex = selectBox.selectedIndex;
+                if (selectedIndex == 3) {
+                    document.getElementById("MedicalDivIDFor").style.display = "block";
                 }
             }
 
