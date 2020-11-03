@@ -424,7 +424,7 @@ public class biometric extends HttpServlet {
             //    stmt2 = Con.createStatement();
             stmt3 = Con.createStatement();
             stmt = Con.createStatement();
-			stmt1 = Con.createStatement();
+            stmt1 = Con.createStatement();
             // check if photo already exists
 //            System.out.println("national iddddddddddddddddd" + nationalID);
 
@@ -440,10 +440,13 @@ public class biometric extends HttpServlet {
             // System.out.println(photo64);
             String sql = "update mi.clients_data set hasPhoto = 1 , MedicalCheckupID = '" + medical_check_up_ID + "' where requestID = '" + requestID + "';";
             int update = stmt3.executeUpdate(sql);
-			  /////////////////////////////////////////////////////////
+            
+            // biometric.java
+
+            /////////////////////////////////////////////////////////
             // log this transaction 
             // get logged username
-            String name = request.getSession().getAttribute("NAME").toString();
+            String name = request.getSession().getAttribute("USERNAME").toString();
             // get logged trafic_unit
             String TU = request.getSession().getAttribute("TRAFFIC_UNIT").toString();
             // update log table 
@@ -451,7 +454,7 @@ public class biometric extends HttpServlet {
             int inserted = stmt1.executeUpdate(sql);
             stmt1.close();
             ///////////////////////////////////////////////////////////
-		  if (update > 0) {
+            if (update > 0) {
                 out.println("<script type='text/javascript'>");
 
                 out.println("alert('تم تعديل الصورة');");
