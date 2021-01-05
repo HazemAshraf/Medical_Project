@@ -1,0 +1,93 @@
+body, html{
+ height: 50%;
+ width: 100%;
+}
+
+.login{
+margin-top: 20%;
+    margin-left: 8%
+    
+}
+.low{
+width: 25em;
+}
+.verticalruler{
+position: absolute;
+left: 50%;
+bottom: 12%;
+width: 0.1%;
+height: 25em;
+background-color: #919191;
+}
+
+.customer{
+    position: absolute;
+    bottom: 120%;
+}
+
+
+.Homelogo{   
+position: absolute;
+    bottom: 0%;
+    background-color: #c7c7c7;
+    width: 100%;
+}
+
+.Indexlogo{
+position: absolute;
+    left: 37%;
+    bottom: 70%;
+}
+
+.nav > ul {
+    position: absolute;
+    width: 100%;
+    bottom: 76%;
+    height: 100%;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+.nav > ul > li {
+    padding: 1%;
+    align-items: center;
+     background-color: #52554b;
+    width: 20%;
+    display: inline;
+    float: left;
+}
+
+.nav > ul > li > a:link,.nav > ul > li > a:visited {
+    display: inline;
+    width: 120px;
+    font-weight: bold;
+    color: #FFFFFF;
+   
+    text-align: center;
+    padding: 4px;
+    text-decoration: none;
+    text-transform: uppercase;
+}
+
+.nav > ul > li:hover,.nav > ul > li:active {
+    background-color: #ea1919;
+}
+
+
+.content{
+position: absolute;
+   
+    top: 25%;
+    left:1% ;
+        
+}
+
+.TrackOrderTable{
+margin-top:100px;
+}
+
+.productViewContainer{
+margin-top:200px;
+}

@@ -1,0 +1,7 @@
+1- right click on database schema "vi" in the left panel and choose make as default schema
+
+2- apply this statment on a new sql tabe :
+
+ALTER TABLE `insurance_policy` ADD `pay_method` 
+VARCHAR(25) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL 
+DEFAULT NULL AFTER `attach_to_date`;
