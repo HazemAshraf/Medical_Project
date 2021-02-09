@@ -107,7 +107,7 @@ public class paymentNotification extends HttpServlet {
             String propFileName = "config.properties";
 
             //inputStream = getClass().getClassLoader().getResourceAsStream(propFileName);
-            //  inputStream = new FileInputStream("C:\\Users\\User\\Desktop\\apache-tomcat-8.5.5\\conf\\config.properties");
+             // inputStream = new FileInputStream("C:\\Users\\User\\Desktop\\apache-tomcat-8.5.5\\conf\\config.properties");
             inputStream = new FileInputStream("C:\\Program Files\\Apache Software Foundation\\Tomcat 8.5\\conf\\config.properties");
 
             if (inputStream != null) {
@@ -188,16 +188,16 @@ public class paymentNotification extends HttpServlet {
         }
 
         if (a.equals("TIT_Medical_payment")) {
-              Con = myCon.myconnection();
-                    if (Con != null) {
-                        System.out.println("Database Connection to the localhost done successfully");
-                    }
+            Con = myCon.myconnection();
+            if (Con != null) {
+                System.out.println("Database Connection to the localhost done successfully");
+            }
             Paymentnotify obj = mapper.readValue(rcvd.toString(), Paymentnotify.class);
             System.out.println("objjjjjjjjj : " + obj.getNationalID() + "  " + obj.getRequestID() + "  ");
             try {
 
                 String jasperName = "";
-              //  System.out.println("aaaaaaaaaaaaa");
+                //  System.out.println("aaaaaaaaaaaaa");
 
                 if (!PassportIssueCountryCode.equals("")) {
                     List<PassportIssueCountry> passportIssue = entityManager.createNamedQuery("PassportIssueCountry.findByDescription", PassportIssueCountry.class).setParameter("description", PassportIssueCountryCode).getResultList();
@@ -242,46 +242,73 @@ public class paymentNotification extends HttpServlet {
                 // System.out.println("aaaaaaaaaaaaaaaaaaaaa "+p);
                 String finalMedicalFees = "0";
                 String finalBloodFees = "0";
+                String finalPracticalExam = "0";
                 String username = "";
                 String password = "";
                 if (listp.size() > 0) {
+                   // System.out.println("already exist");
                     username = listp.get(0).getEusername();
                     password = listp.get(0).getEpassword();
-                    totalAmountNormal = String.valueOf(Integer.parseInt(finalMedicalFees) + Integer.parseInt(finalBloodFees) + Integer.parseInt(openElecFile) + Integer.parseInt(drivingElecTutorials) + Integer.parseInt(drivingElecTutorials));
+                    totalAmountNormal = String.valueOf(Integer.parseInt(finalMedicalFees) + Integer.parseInt(finalBloodFees) + Integer.parseInt(openElecFile) + Integer.parseInt(drivingElecTutorials) + Integer.parseInt(identityNoAndPhotography) + Integer.parseInt(finalPracticalExam));
+                    params.put("identityNoAndPhotography", identityNoAndPhotography); // 0
+                    params.put("openElecFile", openElecFile); // 0
+                    params.put("drivingElecTutorials", drivingElecTutorials); // 0
+                    
                     params.put("totalAmount", totalAmountNormal); // 650
                     params.put("medicalFees", finalMedicalFees); // 200
                     params.put("bloodFees", finalBloodFees); // 85
+                    params.put("practicalExam", finalPracticalExam); // 85
                     // check the lic type to go through blood condition and pay 85 only
                     boolean licType = false;
                     Statement stmt3 = null;
                     stmt3 = Con.createStatement();
                     ResultSet rs3 = stmt3.executeQuery("select name from mi.mehany_lic where 1;");
-                    while(rs3.next()){
-                        if(listp.get(0).getLicenseType().equals(rs3.getString("name"))){
+                    while (rs3.next()) {
+                        if (listp.get(0).getLicenseType().equals(rs3.getString("name"))) {
                             //System.out.println("found");
-                        licType = true;
-                        break;
+                            licType = true;
+                            break;
                         }
                     }
                     stmt3.close();
-                    if(licType){
-                       // System.out.println("found and action");
-                       finalMedicalFees = "0";
+                    if (licType) {
+                        // System.out.println("found and action");
+                        finalMedicalFees = "0";
                         finalBloodFees = bloodFees;
                         totalAmountNormal = "0";
-                        totalAmountNormal = String.valueOf(Integer.parseInt(finalMedicalFees) + Integer.parseInt(finalBloodFees) + Integer.parseInt(openElecFile) + Integer.parseInt(drivingElecTutorials) + Integer.parseInt(drivingElecTutorials));
+                        totalAmountNormal = String.valueOf(Integer.parseInt(finalMedicalFees) + Integer.parseInt(finalBloodFees) + Integer.parseInt(openElecFile) + Integer.parseInt(drivingElecTutorials) + Integer.parseInt(identityNoAndPhotography) + Integer.parseInt(finalPracticalExam));
                         params.put("totalAmount", totalAmountNormal); // 650
                         params.put("medicalFees", finalMedicalFees); // 200
                         params.put("bloodFees", finalBloodFees); // 85
-                    }
-                    else if (obj.getPayedElements().contains("Medical")) {
+                    } else if (obj.getPayedElements().contains("Medical")) {
                         finalMedicalFees = medicalFees;
                         finalBloodFees = bloodFees;
-                        totalAmountNormal = String.valueOf(Integer.parseInt(finalMedicalFees) + Integer.parseInt(finalBloodFees) + Integer.parseInt(openElecFile) + Integer.parseInt(drivingElecTutorials) + Integer.parseInt(drivingElecTutorials));
+                        totalAmountNormal = String.valueOf(Integer.parseInt(finalMedicalFees) + Integer.parseInt(finalBloodFees) + Integer.parseInt(openElecFile) + Integer.parseInt(drivingElecTutorials) + Integer.parseInt(identityNoAndPhotography) + Integer.parseInt(finalPracticalExam));
                         params.put("totalAmount", totalAmountNormal); // 650
                         params.put("medicalFees", finalMedicalFees); // 200
                         params.put("bloodFees", finalBloodFees); // 85
                     } 
+                    else if (obj.getPayedElements().contains("Practical_Exam")) {
+                        Statement stmt4 = null;
+                        stmt4 = Con.createStatement();
+                        ResultSet rs4 = stmt4.executeQuery("select * from mi.practical_exam where 1;");
+                        while (rs4.next()) {
+                            if (listp.get(0).getLicenseType().equals(rs4.getString("license_type"))) {
+                                //add practical fees
+                                finalPracticalExam = rs4.getString("fees");
+                                finalMedicalFees = medicalFees;
+                                finalBloodFees = bloodFees;
+                                totalAmountNormal = String.valueOf(Integer.parseInt(finalMedicalFees) + Integer.parseInt(finalBloodFees) + Integer.parseInt(openElecFile) + Integer.parseInt(drivingElecTutorials) + Integer.parseInt(identityNoAndPhotography) + Integer.parseInt(finalPracticalExam));
+                                params.put("totalAmount", totalAmountNormal); // 650
+                                params.put("medicalFees", finalMedicalFees); // 200
+                                params.put("bloodFees", finalBloodFees); // 85
+                                params.put("practicalExam", finalPracticalExam); // 85
+
+                                break;
+                            }
+                        }
+                        stmt4.close();
+                    }
 //                    else if (obj.getPayedElements().contains("BloodTest")) {
 //                        finalMedicalFees = "0";
 //                        finalBloodFees = bloodFees;
@@ -292,12 +319,11 @@ public class paymentNotification extends HttpServlet {
 //                        params.put("bloodFees", finalBloodFees); // 85
 //                    }
                     jasperName = "viPolicy2_3_qoute_reciept.jasper";
-                    obj.setTotalAmount(String.valueOf(Integer.parseInt(finalMedicalFees) + Integer.parseInt(finalBloodFees) + Integer.parseInt(openElecFile) + Integer.parseInt(drivingElecTutorials) + Integer.parseInt(drivingElecTutorials)));
+                    obj.setTotalAmount(String.valueOf(Integer.parseInt(finalMedicalFees) + Integer.parseInt(finalBloodFees) + Integer.parseInt(openElecFile) + Integer.parseInt(drivingElecTutorials) + Integer.parseInt(identityNoAndPhotography) + Integer.parseInt(finalPracticalExam)));
 
                     //check school rules....
                     stmt = null;
 
-                  
                     stmt = Con.createStatement();
                     ResultSet rs = stmt.executeQuery("select * from mi.traffic_units_schools where 1");
                     while (rs.next()) {
@@ -365,41 +391,65 @@ public class paymentNotification extends HttpServlet {
 
                     //  obj1.addProperty("Error Message", "This request ID was used before");
                 } else {
-                    totalAmountNormal = String.valueOf(Integer.parseInt(finalMedicalFees) + Integer.parseInt(finalBloodFees) + Integer.parseInt(openElecFile) + Integer.parseInt(drivingElecTutorials) + Integer.parseInt(drivingElecTutorials));
+                    totalAmountNormal = String.valueOf(Integer.parseInt(finalMedicalFees) + Integer.parseInt(finalBloodFees) + Integer.parseInt(openElecFile) + Integer.parseInt(drivingElecTutorials) + Integer.parseInt(identityNoAndPhotography) + Integer.parseInt(finalPracticalExam));
+                    params.put("identityNoAndPhotography", identityNoAndPhotography); // 0
+                    params.put("openElecFile", openElecFile); // 0
+                    params.put("drivingElecTutorials", drivingElecTutorials); // 0
+
                     params.put("totalAmount", totalAmountNormal); // 650
                     params.put("medicalFees", finalMedicalFees); // 200
                     params.put("bloodFees", finalBloodFees); // 85
-                          // check the lic type to go through blood condition and pay 85 only
+                    params.put("practicalExam", finalPracticalExam); // 85
+                    // check the lic type to go through blood condition and pay 85 only
                     boolean licType = false;
                     Statement stmt3 = null;
                     stmt3 = Con.createStatement();
                     ResultSet rs3 = stmt3.executeQuery("select name from mi.mehany_lic where 1;");
-                    while(rs3.next()){
-                        if(obj.getLicenseType().equals(rs3.getString("name"))){
-                           // System.out.println("found");
-                        licType = true;
-                        break;
+                    while (rs3.next()) {
+                        if (obj.getLicenseType().equals(rs3.getString("name"))) {
+                            // System.out.println("found");
+                            licType = true;
+                            break;
                         }
                     }
                     stmt3.close();
-                    if(licType){
-                       //  System.out.println("found and action");
-                       finalMedicalFees = "0";
+                    if (licType) {
+                        //  System.out.println("found and action");
+                        finalMedicalFees = "0";
                         finalBloodFees = bloodFees;
                         totalAmountNormal = "0";
-                        totalAmountNormal = String.valueOf(Integer.parseInt(finalMedicalFees) + Integer.parseInt(finalBloodFees) + Integer.parseInt(openElecFile) + Integer.parseInt(drivingElecTutorials) + Integer.parseInt(drivingElecTutorials));
+                        totalAmountNormal = String.valueOf(Integer.parseInt(finalMedicalFees) + Integer.parseInt(finalBloodFees) + Integer.parseInt(openElecFile) + Integer.parseInt(drivingElecTutorials) + Integer.parseInt(identityNoAndPhotography) + Integer.parseInt(finalPracticalExam));
                         params.put("totalAmount", totalAmountNormal); // 650
                         params.put("medicalFees", finalMedicalFees); // 200
                         params.put("bloodFees", finalBloodFees); // 85
-                    }
-                    else if (obj.getPayedElements().contains("Medical")) {
+                    } else if (obj.getPayedElements().contains("Medical")) {
                         finalMedicalFees = medicalFees;
                         finalBloodFees = bloodFees;
                         //String.valueOf(Integer.parseInt(finalMedicalFees)) +   String.valueOf(Integer.parseInt(finalBloodFees)) + String.valueOf(Integer.parseInt(openElecFile)) + String.valueOf(Integer.parseInt(drivingElecTutorials)) + String.valueOf(Integer.parseInt(drivingElecTutorials));
-                        totalAmountNormal = String.valueOf(Integer.parseInt(finalMedicalFees) + Integer.parseInt(finalBloodFees) + Integer.parseInt(openElecFile) + Integer.parseInt(drivingElecTutorials) + Integer.parseInt(drivingElecTutorials));
+                        totalAmountNormal = String.valueOf(Integer.parseInt(finalMedicalFees) + Integer.parseInt(finalBloodFees) + Integer.parseInt(openElecFile) + Integer.parseInt(drivingElecTutorials) + Integer.parseInt(identityNoAndPhotography) + Integer.parseInt(finalPracticalExam));
                         params.put("totalAmount", totalAmountNormal); // 650
                         params.put("medicalFees", finalMedicalFees); // 200
                         params.put("bloodFees", finalBloodFees); // 85
+                    } else if (obj.getPayedElements().contains("Practical_Exam")) {
+                        Statement stmt4 = null;
+                        stmt4 = Con.createStatement();
+                        ResultSet rs4 = stmt4.executeQuery("select * from mi.practical_exam where 1;");
+                        while (rs4.next()) {
+                            if (obj.getLicenseType().equals(rs4.getString("license_type"))) {
+                                //add practical fees
+                                finalPracticalExam = rs4.getString("fees");
+                                finalMedicalFees = medicalFees;
+                                finalBloodFees = bloodFees;
+                                totalAmountNormal = String.valueOf(Integer.parseInt(finalMedicalFees) + Integer.parseInt(finalBloodFees) + Integer.parseInt(openElecFile) + Integer.parseInt(drivingElecTutorials) + Integer.parseInt(identityNoAndPhotography) + Integer.parseInt(finalPracticalExam));
+                                params.put("totalAmount", totalAmountNormal); // 650
+                                params.put("medicalFees", finalMedicalFees); // 200
+                                params.put("bloodFees", finalBloodFees); // 85
+                                params.put("practicalExam", finalPracticalExam); // 85
+
+                                break;
+                            }
+                        }
+                        stmt4.close();
                     }
 //                    else if (obj.getPayedElements().contains("BloodTest")) {
 //                        finalMedicalFees = "0";
@@ -412,7 +462,7 @@ public class paymentNotification extends HttpServlet {
 //                        params.put("bloodFees", finalBloodFees); // 85
 //                    }
                     jasperName = "viPolicy2_3_qoute_reciept.jasper";
-                    obj.setTotalAmount(String.valueOf(Integer.parseInt(finalMedicalFees) + Integer.parseInt(finalBloodFees) + Integer.parseInt(openElecFile) + Integer.parseInt(drivingElecTutorials) + Integer.parseInt(drivingElecTutorials)));
+                    obj.setTotalAmount(String.valueOf(Integer.parseInt(finalMedicalFees) + Integer.parseInt(finalBloodFees) + Integer.parseInt(openElecFile) + Integer.parseInt(drivingElecTutorials) + Integer.parseInt(identityNoAndPhotography) + Integer.parseInt(finalPracticalExam)));
                     //check school rules....
                     stmt = null;
                     Con = myCon.myconnection();
