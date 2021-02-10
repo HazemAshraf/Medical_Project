@@ -107,8 +107,8 @@ public class paymentNotification extends HttpServlet {
             String propFileName = "config.properties";
 
             //inputStream = getClass().getClassLoader().getResourceAsStream(propFileName);
-             // inputStream = new FileInputStream("C:\\Users\\User\\Desktop\\apache-tomcat-8.5.5\\conf\\config.properties");
-            inputStream = new FileInputStream("C:\\Program Files\\Apache Software Foundation\\Tomcat 8.5\\conf\\config.properties");
+              inputStream = new FileInputStream("C:\\Users\\User\\Desktop\\apache-tomcat-8.5.5\\conf\\config.properties");
+           // inputStream = new FileInputStream("C:\\Program Files\\Apache Software Foundation\\Tomcat 8.5\\conf\\config.properties");
 
             if (inputStream != null) {
                 prop.load(inputStream);
@@ -288,7 +288,9 @@ public class paymentNotification extends HttpServlet {
                         params.put("medicalFees", finalMedicalFees); // 200
                         params.put("bloodFees", finalBloodFees); // 85
                     } 
-                    else if (obj.getPayedElements().contains("Practical_Exam")) {
+                    
+                    
+                    if (obj.getPayedElements().contains("Practical_Exam")) {
                         Statement stmt4 = null;
                         stmt4 = Con.createStatement();
                         ResultSet rs4 = stmt4.executeQuery("select * from mi.practical_exam where 1;");
@@ -296,8 +298,6 @@ public class paymentNotification extends HttpServlet {
                             if (listp.get(0).getLicenseType().equals(rs4.getString("license_type"))) {
                                 //add practical fees
                                 finalPracticalExam = rs4.getString("fees");
-                                finalMedicalFees = medicalFees;
-                                finalBloodFees = bloodFees;
                                 totalAmountNormal = String.valueOf(Integer.parseInt(finalMedicalFees) + Integer.parseInt(finalBloodFees) + Integer.parseInt(openElecFile) + Integer.parseInt(drivingElecTutorials) + Integer.parseInt(identityNoAndPhotography) + Integer.parseInt(finalPracticalExam));
                                 params.put("totalAmount", totalAmountNormal); // 650
                                 params.put("medicalFees", finalMedicalFees); // 200
@@ -430,7 +430,10 @@ public class paymentNotification extends HttpServlet {
                         params.put("totalAmount", totalAmountNormal); // 650
                         params.put("medicalFees", finalMedicalFees); // 200
                         params.put("bloodFees", finalBloodFees); // 85
-                    } else if (obj.getPayedElements().contains("Practical_Exam")) {
+                    }
+                    
+                    
+                     if (obj.getPayedElements().contains("Practical_Exam")) {
                         Statement stmt4 = null;
                         stmt4 = Con.createStatement();
                         ResultSet rs4 = stmt4.executeQuery("select * from mi.practical_exam where 1;");
@@ -438,8 +441,6 @@ public class paymentNotification extends HttpServlet {
                             if (obj.getLicenseType().equals(rs4.getString("license_type"))) {
                                 //add practical fees
                                 finalPracticalExam = rs4.getString("fees");
-                                finalMedicalFees = medicalFees;
-                                finalBloodFees = bloodFees;
                                 totalAmountNormal = String.valueOf(Integer.parseInt(finalMedicalFees) + Integer.parseInt(finalBloodFees) + Integer.parseInt(openElecFile) + Integer.parseInt(drivingElecTutorials) + Integer.parseInt(identityNoAndPhotography) + Integer.parseInt(finalPracticalExam));
                                 params.put("totalAmount", totalAmountNormal); // 650
                                 params.put("medicalFees", finalMedicalFees); // 200
@@ -579,8 +580,8 @@ public class paymentNotification extends HttpServlet {
 ////                JasperExportManager.exportReportToPdfFile(print,"C:/User/user/Desktop/Test.pdf");
 ////                    System.out.println("ddddddddddddddddddd");
                 JasperPrint print = JasperFillManager.fillReport(jasperReport, params, new JREmptyDataSource());
-                String receiptPath = "C:\\Program Files\\Apache Software Foundation\\Tomcat 8.5\\webapps\\path\\to\\receipt\\" + fileName + ".pdf";
-                //  String receiptPath = "C:\\Users\\User\\Desktop\\apache-tomcat-8.5.5\\webapps\\path\\to\\receipt\\" + fileName + ".pdf";
+               // String receiptPath = "C:\\Program Files\\Apache Software Foundation\\Tomcat 8.5\\webapps\\path\\to\\receipt\\" + fileName + ".pdf";
+                  String receiptPath = "C:\\Users\\User\\Desktop\\apache-tomcat-8.5.5\\webapps\\path\\to\\receipt\\" + fileName + ".pdf";
                 JasperExportManager.exportReportToPdfFile(print, receiptPath);
 
                 String IP = "";
@@ -588,18 +589,18 @@ public class paymentNotification extends HttpServlet {
                 String TU = obj.getTrafficUnit();
                 IP = loadedIp;
 
-                stmt = null;
-
-                stmt = Con.createStatement();
-                ResultSet rs = stmt.executeQuery("select * from mi.flybox_medical where 1");
-                while (rs.next()) {
-                    if (TU.contains(rs.getString("TrafficUnit"))) {
-                        IP = loadedNattingIp;
-                        break;
-                    }
-                }
-
-                stmt.close();
+//                stmt = null;
+//
+//                stmt = Con.createStatement();
+//                ResultSet rs = stmt.executeQuery("select * from mi.flybox_medical where 1");
+//                while (rs.next()) {
+//                    if (TU.contains(rs.getString("TrafficUnit"))) {
+//                        IP = loadedNattingIp;
+//                        break;
+//                    }
+//                }
+//
+//                stmt.close();
 
 ////                if (request.getRemoteAddr().toString().contains("192.168.235.55") || request.getRemoteAddr().toString().contains("192.168.235.51")) {
 ////                    IP = "192.168.235.76";
